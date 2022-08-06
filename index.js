@@ -1,30 +1,86 @@
-const canvas = document.getElementById("canvas");
-const context = canvas.getContext("2d");
+const btnPlay = document.getElementById("btn-play")
+const btnClear = document.getElementById("btn-clear")
 
-let btn = document.getElementById("btn-play");
+let interval
+let isResume = false
 
-canvas.width = 800;
-canvas.height = 600;
-
-btn.addEventListener("click", () => {
-  let x = Math.random() * 750;
-  let y = Math.random() * 550;
-  let vx = 1;
-  let vy = 1;
-  function anim() {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    requestAnimationFrame(anim);
-    context.fillRect(x, y, 50, 50);
-
-    if (x + 50 > canvas.width || x < 0) {
-      vx = -vx;
-    }
-    if (y + 50 > canvas.height || y < 0) {
-      vy = -vy;
-    }
-    x += vx;
-    y += vy;
+btnPlay.addEventListener("click", () => {
+  if (!isResume) {
+    isResume = true
+    start()
+  } else {
+    null
   }
-  anim();
-});
+})
+
+btnClear.addEventListener("click", () => {
+  stop()
+  isResume = false
+})
+
+function start() {
+  const canvas = document.getElementById("canvas")
+  const ctx = canvas.getContext("2d")
+
+  let player = {
+    x: Math.abs(Math.floor(Math.random() * canvas.width) - 100),
+    y: Math.abs(Math.floor(Math.random() * canvas.height) - 100),
+    speed: 2,
+  }
+  let RIGHT = false
+  let LEFT = false
+
+  document.onkeydown = function (e) {
+    if (e.key == "ArrowRight") {
+      RIGHT = true
+    }
+    if (e.key == "ArrowLeft") {
+      LEFT = true
+    }
+  }
+
+  document.onkeyup = function (e) {
+    if (e.key == "ArrowRight") {
+      RIGHT = false
+    }
+    if (e.key == "ArrowLeft") {
+      LEFT = false
+    }
+  }
+  function move() {
+    if (RIGHT) {
+      player.x += player.speed
+    }
+    if (LEFT) {
+      player.x -= player.speed
+    }
+  }
+
+  function clear() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+  }
+
+  function ship() {
+    let xShip = player.x
+    let yShip = player.y
+    ctx.fillStyle = "red"
+
+    ctx.beginPath()
+    ctx.rect(xShip, yShip, 100, 100)
+    ctx.fill()
+  }
+
+  function update() {
+    clear()
+    ship()
+    move()
+  }
+  return (interval = setInterval(update, 10))
+}
+
+function stop() {
+  const canvas = document.getElementById("canvas")
+  const ctx = canvas.getContext("2d")
+  clearInterval(interval)
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+}
